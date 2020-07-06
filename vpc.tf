@@ -8,14 +8,25 @@ resource "aws_vpc" "default" {
   }
 }
 
-# Define the public subnet
-resource "aws_subnet" "public-subnet" {
+# Define the first public subnet
+resource "aws_subnet" "public-subnet1" {
   vpc_id = "${aws_vpc.default.id}"
-  cidr_block = "${var.public_subnet_cidr}"
+  cidr_block = "${var.public_subnet1_cidr}"
   availability_zone = "us-east-1a"
 
   tags={
-    Name = "Web Public Subnet"
+    Name = "Public Subnet - 1"
+  }
+}
+
+# Define the second public subnet
+resource "aws_subnet" "public-subnet2" {
+  vpc_id = "${aws_vpc.default.id}"
+  cidr_block = "${var.public_subnet2_cidr}"
+  availability_zone = "us-east-1b"
+
+  tags={
+    Name = "Public Subnet - 2"
   }
 }
 
@@ -54,8 +65,14 @@ resource "aws_route_table" "web-public-rt" {
 }
 
 # Assign the route table to the public Subnet
-resource "aws_route_table_association" "web-public-rt" {
-  subnet_id = "${aws_subnet.public-subnet.id}"
+resource "aws_route_table_association" "public-rt" {
+  subnet_id = "${aws_subnet.public-subnet1.id}"
+  route_table_id = "${aws_route_table.web-public-rt.id}"
+}
+
+# Assign the route table to the public subnet 2
+resource "aws_route_table_association" "public-rt2" {
+  subnet_id = "${aws_subnet.public-subnet2.id}"
   route_table_id = "${aws_route_table.web-public-rt.id}"
 }
 
@@ -114,21 +131,21 @@ resource "aws_security_group" "sgdb"{
     from_port = 3306
     to_port = 3306
     protocol = "tcp"
-    cidr_blocks = ["${var.public_subnet_cidr}"]
+    cidr_blocks = ["${var.public_subnet1_cidr}","${var.public_subnet2_cidr}"]
   }
 
   ingress {
     from_port = -1
     to_port = -1
     protocol = "icmp"
-    cidr_blocks = ["${var.public_subnet_cidr}"]
+    cidr_blocks = ["${var.public_subnet1_cidr}","${var.public_subnet2_cidr}"]
   }
 
   ingress {
     from_port = 22
     to_port = 22
     protocol = "tcp"
-    cidr_blocks = ["${var.public_subnet_cidr}"]
+    cidr_blocks = ["${var.public_subnet1_cidr}","${var.public_subnet2_cidr}"]
   }
 
   vpc_id = "${aws_vpc.default.id}"

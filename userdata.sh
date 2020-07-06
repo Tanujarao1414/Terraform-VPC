@@ -5,4 +5,4 @@ exec > >(tee /var/log/user-data.log|logger -t user-data -s 2>/dev/console) 2>&1
 yum install -y httpd
 service httpd start
 chkonfig httpd on
-echo "<html><h1>Hello.Welcome..!</h2></html>" > /var/www/html/index.html
+echo "<html><h1>Tanuja..!</h2></html>" > /var/www/html/index.html
